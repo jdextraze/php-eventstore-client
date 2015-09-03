@@ -3,7 +3,6 @@
 namespace EventStore;
 
 use EventStore\ValueObjects\Identity\UUID;
-use InvalidArgumentException;
 use stdClass;
 
 /**
@@ -23,45 +22,38 @@ final class WritableEvent implements WritableToStream
     private $type;
 
     /**
-     * @var array|object
+     * @var array
      */
     private $data;
 
     /**
-     * @var array|object
+     * @var array
      */
     private $metadata;
 
     /**
-     * @param  string       $type
-     * @param  array|object $data
-     * @param  array|object $metadata
+     * @param  string $type
+     * @param  array  $data
+     * @param  array  $metadata
      * @return WritableEvent
      */
-    public static function newInstance($type, $data, $metadata = null)
+    public static function newInstance($type, array $data, array $metadata = [])
     {
         return new self(new UUID(), $type, $data, $metadata);
     }
 
     /**
-     * @param UUID         $uuid
-     * @param string       $type
-     * @param array|object $data
-     * @param array|object $metadata
+     * @param UUID   $uuid
+     * @param string $type
+     * @param array  $data
+     * @param array  $metadata
      */
-    public function __construct(UUID $uuid, $type, $data, $metadata = null)
+    public function __construct(UUID $uuid, $type, array $data, array $metadata = [])
     {
-        if (!is_array($data) && !is_object($data)) {
-            throw new InvalidArgumentException('Data expected array or object');
-        }
-        if (!is_null($metadata) && !is_array($data) && !is_object($data)) {
-            throw new InvalidArgumentException('Metadata expected array, object or null');
-        }
-
         $this->uuid = $uuid;
         $this->type = $type;
         $this->data = $data;
-        $this->metadata = $metadata ?: new stdClass();
+        $this->metadata = $metadata;
     }
 
     /**
@@ -72,7 +64,7 @@ final class WritableEvent implements WritableToStream
         return [
             'eventId'   => $this->uuid->toNative(),
             'eventType' => $this->type,
-            'data'      => $this->data,
+            'data'      => $this->data ?: new stdClass(),
             'metadata'  => $this->metadata
         ];
     }
