@@ -61,11 +61,14 @@ final class WritableEvent implements WritableToStream
      */
     public function toStreamData()
     {
-        return [
+        $streamData = [
             'eventId'   => $this->uuid->toNative(),
             'eventType' => $this->type,
-            'data'      => $this->data ?: new stdClass(),
-            'metadata'  => $this->metadata
+            'data'      => $this->data ?: new stdClass()
         ];
+        if ($this->metadata) {
+            $streamData['metadata'] = $this->metadata;
+        }
+        return $streamData;
     }
 }
