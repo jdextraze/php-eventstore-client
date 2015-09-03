@@ -17,6 +17,7 @@ use EventStore\StreamFeed\Event;
 use EventStore\StreamFeed\LinkRelation;
 use EventStore\StreamFeed\StreamFeed;
 use EventStore\StreamFeed\StreamFeedIterator;
+use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Uri;
 use Psr\Http\Message\RequestInterface;
@@ -49,15 +50,18 @@ final class EventStore implements EventStoreInterface
     private $badCodeHandlers = [];
 
     /**
-     * @param string $url Endpoint of the EventStore HTTP API
-     * @param HttpClientInterface the http client
+     * @param string              $url             Endpoint of the EventStore HTTP API
+     * @param bool                $checkConnection Check the connection
+     * @param HttpClientInterface $httpClient      the http client
      */
-    public function __construct($url, HttpClientInterface $httpClient = null)
+    public function __construct($url, $checkConnection = true, HttpClientInterface $httpClient = null)
     {
         $this->url = $url;
 
         $this->httpClient = $httpClient ?: new GuzzleHttpClient();
-        $this->checkConnection();
+        if ($checkConnection) {
+            $this->checkConnection();
+        }
         $this->initBadCodeHandlers();
     }
 
@@ -254,8 +258,8 @@ final class EventStore implements EventStoreInterface
     }
 
     /**
-     * @param  string                                       $uri
-     * @return \GuzzleHttp\Message\Request|RequestInterface
+     * @param  string $uri
+     * @return Request|RequestInterface
      */
     private function getJsonRequest($uri)
     {
