@@ -3,6 +3,8 @@
 namespace EventStore;
 
 use EventStore\ValueObjects\Identity\UUID;
+use InvalidArgumentException;
+use stdClass;
 
 /**
  * Class WritableEvent
@@ -21,38 +23,45 @@ final class WritableEvent implements WritableToStream
     private $type;
 
     /**
-     * @var array
+     * @var array|object
      */
     private $data;
 
     /**
-     * @var array
+     * @var array|object
      */
     private $metadata;
 
     /**
-     * @param  string        $type
-     * @param  array         $data
-     * @param  array         $metadata
+     * @param  string       $type
+     * @param  array|object $data
+     * @param  array|object $metadata
      * @return WritableEvent
      */
-    public static function newInstance($type, array $data, array $metadata = [])
+    public static function newInstance($type, $data, $metadata = null)
     {
         return new self(new UUID(), $type, $data, $metadata);
     }
 
     /**
-     * @param UUID   $uuid
-     * @param string $type
-     * @param array  $data
-     * @param array  $metadata
+     * @param UUID         $uuid
+     * @param string       $type
+     * @param array|object $data
+     * @param array|object $metadata
      */
-    public function __construct(UUID $uuid, $type, array $data, array $metadata = [])
+    public function __construct(UUID $uuid, $type, $data, $metadata = null)
     {
+        if (!is_array($data) && !is_object($data)) {
+            throw new InvalidArgumentException('Data expected array or object');
+        }
+        if (!is_null($metadata) && !is_array($data) && !is_object($data)) {
+            throw new InvalidArgumentException('Metadata expected array, object or null');
+        }
+
         $this->uuid = $uuid;
         $this->type = $type;
         $this->data = $data;
-        $this->metadata = $metadata;
+        $this->metadata = $metadata ?: new stdClass();
     }
 
     /**
